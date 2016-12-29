@@ -1,0 +1,2 @@
+- Download youtubedl and put it in this directory
+- Put this directory into ~/.kodi/addons

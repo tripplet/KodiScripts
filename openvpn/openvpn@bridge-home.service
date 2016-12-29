@@ -1,0 +1,13 @@
+[Unit]
+Description=OpenVPN connection to home network
+Requires=network.target network-online.target
+Wants=wait-for-dns.service
+After=network.target network-online.target systemd-resolved.service wait-for-dns.service
+
+[Service]
+Type=forking
+ExecStart=/storage/.kodi/addons/network.openvpn/bin/openvpn --config /storage/.openvpn/quimby.conf --daemon openvpn@bridge-home --writepid /run/openvpn@bridge-home.pid
+PIDFile=/run/openvpn@bridge-home.pid
+
+[Install]
+WantedBy=multi-user.target
