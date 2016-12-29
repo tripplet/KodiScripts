@@ -1,0 +1,5 @@
+#!/bin/sh
+
+payload='{ "jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "file": "'${1}'" }}, "id": 1 }'
+
+curl -v -d "${payload}" -H "Content-type:application/json" -X POST "http://localhost/jsonrpc"

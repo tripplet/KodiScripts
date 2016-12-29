@@ -1,0 +1,12 @@
+[Unit]
+Description=Wait For DNS to be available
+Requires=network.target
+After=network.target network-online.target systemd-resolved.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'until nslookup google.com &> /dev/null; do sleep 5; done'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
