@@ -33,7 +33,7 @@ payload = {
                     '"item":{"file":"plugin://plugin.video.youtube/?action=' +
                     'play_video&videoid=%s"},' +
                     '"options":' +
-                    '{"resume":{"hours":%d,"seconds":%d,"minutes":%d}}' +
+                    '{"resume":{"hours":%d,"minutes":%d,"seconds":%d}}' +
                     '},"id":1},',
     'generic_url': '{"jsonrpc": "2.0", "method": "Player.open", "params": ' +
                    '{"item": {"file": "%s"}}, "id": 1}'
@@ -189,7 +189,6 @@ def parse_time(time_str):
     if not parts:
         return
     parts = parts.groupdict()
-    print(parts)
     time_params = {}
     for name, param in parts.items():
         if param:
