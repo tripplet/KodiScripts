@@ -114,12 +114,9 @@ def send_url(url, ip):
         data = payload['generic_url'] % (url)
 
     if data is None and 't' in url_parameter:
-        # Get seek time from url
-        seek_seconds = int(parse_time(url_parameter['t'][0]).total_seconds())
-        # back 15s for viewing convenience
-        seek_seconds = max(seek_seconds - 15, 0)
-
-        minutes, seconds = divmod(seek_seconds, 60)
+        # Get seek time from url and go back 15s for viewing convenience
+        seek = parse_time(url_parameter['t'][0]) - timedelta(seconds=15)
+        minutes, seconds = divmod(max(seek, timedelta(0)).total_seconds(), 60)
         hours, minutes = divmod(minutes, 60)
         data = payload['youtube_time'] % (video_id, hours, minutes, seconds)
         log('seek time : {}h {}m {}s'.format(hours, minutes, seconds))
