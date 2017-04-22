@@ -92,3 +92,20 @@
   "id": 1
 }
 ```
+
+### Seek playback
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "Player.Seek",
+  "params": {
+    "playerid": 1,
+    "value": {
+      "hours": 0,
+      "minutes": 0,
+      "seconds": 30
+    }
+  },
+  "id": 2
+}
+```
