@@ -66,7 +66,7 @@ func generatePayload(video string) string {
 
 	// Extract video id for youtube
 	if regexp.MustCompile("[/\\.]youtube\\.com/").FindString(video) != "" {
-		videoId = videoUrl.Query().Get("id")
+		videoId = videoUrl.Query().Get("v")
 	} else if regexp.MustCompile("[/\\.]youtu\\.be/").FindString(video) != "" {
 		videoId = videoUrl.EscapedPath()[1:]
 	} else {
