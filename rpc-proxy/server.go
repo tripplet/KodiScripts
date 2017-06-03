@@ -42,6 +42,7 @@ func main() {
 
 	fmt.Println("Starting server on port", *serverPort)
 	http.HandleFunc("/jsonrpc", HandleRpc)
+	http.HandleFunc("/", HandleWebpage)
 	http.ListenAndServe(fmt.Sprintf(":%d", *serverPort), nil)
 }
 
