@@ -14,7 +14,8 @@ import (
 	"time"
 )
 
-var defaultServerPort = 8000
+var defaultProxyServerPort = 8000
+var defaultKodiPort = 8080
 
 var youtube = strings.Replace("{'jsonrpc': '2.0', 'method': 'Player.Open', 'params':{"+
 	"'item': {'file':'plugin://plugin.video.youtube/?action="+
@@ -32,15 +33,16 @@ type request struct {
 	Url string
 }
 
+var kodiPort *int
+
 func main() {
-	port := flag.Int("port", defaultServerPort, "Server port")
+	serverPort := flag.Int("server", defaultProxyServerPort, "Kodi web port")
+	kodiPort = flag.Int("kodi", defaultKodiPort, "Proxy server port")
 	flag.Parse()
 
+	fmt.Println("Starting server on port", *serverPort)
 	http.HandleFunc("/jsonrpc", HandleRpc)
-
-	fmt.Println("Starting server on port", *port)
-
-	http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+	http.ListenAndServe(fmt.Sprintf(":%d", *serverPort), nil)
 }
 
 func divmod(value int64, modulo int64) (int64, int64) {
@@ -116,7 +118,7 @@ func HandleRpc(w http.ResponseWriter, req *http.Request) {
 	}
 
 	payload := bytes.NewBufferString(generatePayload(s.Url))
-	rsp, err := http.Post("http://localhost:80/jsonrpc", "application/json", payload)
+	rsp, err := http.Post(fmt.Sprintf("http://localhost:%d/jsonrpc", *kodiPort), "application/json", payload)
 	if err != nil {
 		panic(err)
 	}
