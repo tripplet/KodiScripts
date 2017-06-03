@@ -1,0 +1,12 @@
+[Unit]
+Description=RPC proxy for easier api from ios workflow
+Requires=network.target network-online.target
+Required=kodi.target
+
+[Service]
+ExecStart=/storage/.config/rpc-proxy -port 8000
+Restart = always
+RestartSec = 10
+
+[Install]
+WantedBy=multi-user.target
