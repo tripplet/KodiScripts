@@ -4,7 +4,7 @@ Requires=network.target network-online.target
 Required=kodi.target
 
 [Service]
-ExecStart=/storage/.config/rpc-proxy -port 8000
+ExecStart=/storage/.config/rpc-proxy -server 8000 -kodi 8080
 Restart = always
 RestartSec = 10
 
