@@ -87,18 +87,7 @@ var html = []byte(`
       border-radius: 0 2px 2px 0;
     }
 
-    /* Spinner from: http://tobiasahlin.com/spinkit/
-     *  Usage:
-     *
-     *    <div class="sk-wave">
-     *      <div class="sk-rect sk-rect1"></div>
-     *      <div class="sk-rect sk-rect2"></div>
-     *      <div class="sk-rect sk-rect3"></div>
-     *      <div class="sk-rect sk-rect4"></div>
-     *      <div class="sk-rect sk-rect5"></div>
-     *    </div>
-     *
-     */
+    /* Spinner from: http://tobiasahlin.com/spinkit/ */
     .sk-wave {
       margin: 40px auto;
       width: 50px;
@@ -146,7 +135,8 @@ var html = []byte(`
 <body>
   <div class="container"><form>
     <div class="InputAddOn">
-      <input name="url" id="link" class="InputAddOn-field" placeholder="http://..." autocomplete="off" type="url" size="50" autofocus required /><button class="InputAddOn-item" id="send-link" type="button" onclick="sendUrl()">Send</button>
+      <input name="url" id="link" class="InputAddOn-field" placeholder="http://..." autocomplete="off" type="url" size="50" autofocus required/>
+      <button class="InputAddOn-item" id="send-link" type="button" onclick="sendUrl()">Play</button>
     </div>
     <div class="sk-wave" id="progress" style="display: none">
       <div class="sk-rect sk-rect1"></div>
@@ -156,8 +146,7 @@ var html = []byte(`
       <div class="sk-rect sk-rect5"></div>
     </div>
   </form></div>
-</body>
-<script>
+  <script>
   function sendUrl() {
     var link = document.getElementById("link");
     var progress = document.getElementById("progress");
@@ -181,6 +170,7 @@ var html = []byte(`
     xhr.send(JSON.stringify({"url": link.value}));
   }
 </script>
+</body>
 </html>
 `)
 
