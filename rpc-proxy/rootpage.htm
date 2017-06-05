@@ -1,15 +1,8 @@
-package main
-
-import (
-	"net/http"
-)
-
-var html = []byte(`
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kodi</title>
   <style>
     html, body {
@@ -172,8 +165,3 @@ var html = []byte(`
 </script>
 </body>
 </html>
-`)
-
-func HandleWebpage(w http.ResponseWriter, req *http.Request) {
-	w.Write(html)
-}
