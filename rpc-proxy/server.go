@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+//go:generate go run gen.go
+
 var defaultProxyServerPort = 8000
 var defaultKodiPort = 8080
 
@@ -42,7 +44,7 @@ func main() {
 
 	fmt.Println("Starting server on port", *serverPort)
 	http.HandleFunc("/jsonrpc", HandleRpc)
-	http.HandleFunc("/", HandleWebpage)
+	http.HandleFunc("/", rootpage_htm)
 	http.ListenAndServe(fmt.Sprintf(":%d", *serverPort), nil)
 }
 
