@@ -19,7 +19,8 @@ var resources = map[string]string{
 
 func main() {
 	for res := range resources {
-		fmt.Println("Generating ", resources[res])
+		fmt.Printf("(Re)generating go file for '%s'", resources[res])
+		fmt.Println()
 
 		rawContent, err := ioutil.ReadFile(resources[res])
 		if err != nil {
