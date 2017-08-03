@@ -129,7 +129,7 @@
   <div class="container"><form>
     <div class="InputAddOn">
       <input name="url" id="link" class="InputAddOn-field" placeholder="http://..." autocomplete="off" type="url" size="50" autofocus required/>
-      <button class="InputAddOn-item" id="send-link" type="button" onclick="sendUrl()">Play</button>
+      <input class="InputAddOn-item" id="send-link" type="submit" onclick="sendUrl()"/>
     </div>
     <div class="sk-wave" id="progress" style="display: none">
       <div class="sk-rect sk-rect1"></div>
@@ -140,27 +140,35 @@
     </div>
   </form></div>
   <script>
+  function resetForm(progress, button, link, in_progress) {
+    if (in_progress) {
+      progress_state = "block";
+    }
+    else {
+      progress_state = "none";
+    }
+    progress.style.display = progress_state;
+    button.disabled = in_progress;
+    link.disabled = in_progress;
+  }
   function sendUrl() {
     var link = document.getElementById("link");
     var progress = document.getElementById("progress");
     var button = document.getElementById("send-link");
 
-    progress.style.display = "block";
-    button.disabled = true;
-    link.disabled = true;
+    resetForm(progress, button, link, true);
 
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == XMLHttpRequest.DONE) {
-        progress.style.display = "none";
-        button.disabled = false;
-        link.disabled = false;
-      }
-    }
-
-    xhr.open("POST", "/jsonrpc", true);
-    xhr.setRequestHeader('Content-type', 'application/json');
-    xhr.send(JSON.stringify({"url": link.value}));
+    fetch("/jsonrpc", {
+      headers: { "Content-Type": "application/json" },
+      method: "post",
+      body: JSON.stringify({"url": link.value})
+    }).then(function(response) {
+      resetForm(progress, button, link, false);
+      link.value = "";
+    }).catch(function(err) {
+      resetForm(progress, button, link, false);
+      alert(err);
+    });
   }
 </script>
 </body>
