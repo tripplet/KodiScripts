@@ -11,6 +11,23 @@
       margin: 0;
     }
 
+    /* Custom style for small devices */
+    @media (max-width: 750px) {
+      .InputAddOn {
+        display: block !important;
+        text-align: center;
+        margin: 0 auto;
+      }
+    
+      .InputAddOn-field, .InputAddOn-item {
+        padding: 1em 1em !important;
+      }
+    
+      input[name="url"] {
+        width: 84% !important;
+      }
+    }
+
     a {
       color: rgb(0, 140, 186);
     }
@@ -130,7 +147,10 @@
                 transform: scaleY(1); } }
   </style>
   <script>
-    function resetForm(progress, button, link, in_progress) {
+    function resetForm(in_progress) {
+      var link = document.getElementById("link");
+      var progress = document.getElementById("progress");
+      var button = document.getElementById("send-link");
       if (in_progress) {
         progress_state = "block";
       }
@@ -142,21 +162,16 @@
       link.disabled = in_progress;
     }
     function sendUrl() {
-      var link = document.getElementById("link");
-      var progress = document.getElementById("progress");
-      var button = document.getElementById("send-link");
-
-      resetForm(progress, button, link, true);
-
+      resetForm(true);
       fetch("/jsonrpc", {
         headers: { "Content-Type": "application/json" },
         method: "post",
         body: JSON.stringify({"url": link.value})
       }).then(function(response) {
-        resetForm(progress, button, link, false);
+        resetForm(false);
         link.value = "";
       }).catch(function(err) {
-        resetForm(progress, button, link, false);
+        resetForm(false);
         alert(err);
       });
     }
