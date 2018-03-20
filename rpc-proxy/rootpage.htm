@@ -18,11 +18,11 @@
         text-align: center;
         margin: 0 auto;
       }
-    
+
       .InputAddOn-field, .InputAddOn-item {
         padding: 1em 1em !important;
       }
-    
+
       input[name="url"] {
         width: 84% !important;
       }
@@ -63,9 +63,11 @@
       -ms-flex: 1;
       flex: 1;
     }
+
     .InputAddOn-field:not(:first-child) {
       border-left: 0;
     }
+
     .InputAddOn-field:not(:last-child) {
       border-right: 0;
     }
@@ -145,8 +147,51 @@
       20% {
         -webkit-transform: scaleY(1);
                 transform: scaleY(1); } }
+
+    .slidecontainer {
+      width: 100%;
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 10px;
+      border-radius: 3px;
+      background: white;
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+    }
+
+    .slider:hover {
+      opacity: 1;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgb(0, 140, 186);
+      cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgb(0, 140, 186);
+      cursor: pointer;
+    }
   </style>
   <script>
+    var active_playerid = -1;
+    var refresh_timer = null;
+    var activeplayer_timer = null;
+    var connection = new WebSocket('ws://{{ .KodiRPC }}');
+
     function resetForm(in_progress) {
       var link = document.getElementById("link");
       var progress = document.getElementById("progress");
@@ -161,6 +206,7 @@
       button.disabled = in_progress;
       link.disabled = in_progress;
     }
+
     function sendUrl() {
       resetForm(true);
       fetch("/jsonrpc", {
@@ -175,6 +221,65 @@
         alert(err);
       });
     }
+
+    function getPercentage() {
+      connection.send(JSON.stringify({
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "Player.GetProperties",
+        "params": { "playerid": playerid, "properties": ["percentage", "time", "totaltime"] }
+      }));
+
+      clearTimeout(refresh_timer);
+      clearTimeout(activeplayer_timer);
+      refresh_timer = window.setTimeout(getPercentage, 1000);
+    }
+
+    function getActivePlayers() {
+      connection.send(JSON.stringify({"id": 1, "jsonrpc": "2.0", "method": "Player.GetActivePlayers"}));
+
+      clearTimeout(activeplayer_timer);
+      if (active_playerid != -1) {
+        activeplayer_timer = window.setTimeout(getActivePlayers, 1000);
+      }
+    }
+
+    function seek(value) {
+      connection.send(JSON.stringify({
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "Player.Seek",
+        "params": { "playerid": playerid, "value": parseFloat(value)}
+      }));
+    }
+
+    connection.onerror = function (e) {
+      console.log('Error: ' + e.data);
+    }
+
+    // Log messages from the server
+    connection.onmessage = function (e) {
+      var result = JSON.parse(e.data)["result"];
+      if (result === undefined) {
+          return;
+      }
+
+      if (result.length == 1 && result[0] === Object(result[0]) && "playerid" in result[0])
+      {
+        active_playerid = result[0]["playerid"]
+        getPercentage();
+      }
+      else if (result === Object(result) && "percentage" in result) {
+          document.getElementById("progress").value = result["percentage"];
+          document.getElementById("progress-text").innerHTML = result["time"]["hours"] + "h" + result["time"]["minutes"] + "m" + result["time"]["seconds"] + "s";
+          document.getElementById("slider").style["visibility"] = "visible";
+      }
+    }
+
+    connection.onopen = function () {
+      getActivePlayers();
+    };
+
   </script>
 </head>
 <body>
@@ -189,6 +294,10 @@
       <div class="sk-rect sk-rect3"></div>
       <div class="sk-rect sk-rect4"></div>
       <div class="sk-rect sk-rect5"></div>
+    </div>
+    <div id="slider" class="slidecontainer" style="visibility: collapse;">
+      <input type="range" min="1" max="100" class="slider" id="progress" onchange="seek(this.value)"/>
+      <div style="text-align: center; margin: 10px; color: rgb(0, 71, 95);" id="progress-text"></div>
     </div>
     <div style="text-align: center;"><a href="{{ .KodiURL }}">Kodi Web Interface</a></div>
   </form></div>

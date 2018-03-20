@@ -12,17 +12,20 @@ import (
 //go:generate go run gen.go
 
 const defaultProxyServerPort = 8000
-const defaultKodiPort = 8080
+const defaultKodiHttpPort = 8080
+const defaultKodiRpcPort = 9090
 
 type request struct {
 	Url string
 }
 
-var kodiPort *int
+var kodiHttpPort *int
+var kodiRpcPort *int
 
 func main() {
-	serverPort := flag.Int("server", defaultProxyServerPort, "Kodi web port")
-	kodiPort = flag.Int("kodi", defaultKodiPort, "Proxy server port")
+	serverPort := flag.Int("server", defaultProxyServerPort, "Proxy server port")
+	kodiHttpPort = flag.Int("http", defaultKodiHttpPort, "Kodi web port")
+	kodiRpcPort = flag.Int("rpc", defaultKodiRpcPort, "Kodi rpc port")
 	flag.Parse()
 
 	fmt.Println("Starting server on port", *serverPort)
@@ -47,7 +50,7 @@ func HandleRpc(w http.ResponseWriter, req *http.Request) {
 
 	// Send request to kodi
 	payload := bytes.NewBufferString(generatePayload(s.Url))
-	rsp, err := http.Post(fmt.Sprintf("http://localhost:%d/jsonrpc", *kodiPort), "application/json", payload)
+	rsp, err := http.Post(fmt.Sprintf("http://localhost:%d/jsonrpc", *kodiHttpPort), "application/json", payload)
 	if err != nil {
 		panic(err)
 	}
