@@ -150,6 +150,7 @@
 
     .slidecontainer {
       width: 100%;
+      display: none;
     }
 
     .slider {
@@ -162,6 +163,12 @@
       opacity: 0.7;
       -webkit-transition: .2s;
       transition: opacity .2s;
+    }
+
+    .slider-text {
+      text-align: center;
+      margin: 10px;
+      color: rgb(0, 71, 95);
     }
 
     .slider:hover {
@@ -227,21 +234,30 @@
         "id": 1,
         "jsonrpc": "2.0",
         "method": "Player.GetProperties",
-        "params": { "playerid": playerid, "properties": ["percentage", "time", "totaltime"] }
+        "params": { "playerid": active_playerid, "properties": ["percentage", "time", "totaltime"] }
       }));
 
       clearTimeout(refresh_timer);
-      clearTimeout(activeplayer_timer);
-      refresh_timer = window.setTimeout(getPercentage, 1000);
+
+      if (active_playerid != -1)
+      {
+        refresh_timer = window.setTimeout(getPercentage, 1000);
+      }
     }
 
     function getActivePlayers() {
       connection.send(JSON.stringify({"id": 1, "jsonrpc": "2.0", "method": "Player.GetActivePlayers"}));
 
       clearTimeout(activeplayer_timer);
-      if (active_playerid != -1) {
+      if (active_playerid == -1) {
         activeplayer_timer = window.setTimeout(getActivePlayers, 1000);
       }
+    }
+
+    function hideProgress() {
+        active_playerid = -1;
+        document.getElementById("slider-container-main").style["display"] = "none";
+        getActivePlayers();
     }
 
     function seek(value) {
@@ -249,7 +265,7 @@
         "id": 1,
         "jsonrpc": "2.0",
         "method": "Player.Seek",
-        "params": { "playerid": playerid, "value": parseFloat(value)}
+        "params": { "playerid": active_playerid, "value": parseFloat(value)}
       }));
     }
 
@@ -259,20 +275,33 @@
 
     // Log messages from the server
     connection.onmessage = function (e) {
-      var result = JSON.parse(e.data)["result"];
-      if (result === undefined) {
+      var rx = JSON.parse(e.data);
+      if (rx === undefined) {
           return;
       }
 
-      if (result.length == 1 && result[0] === Object(result[0]) && "playerid" in result[0])
-      {
-        active_playerid = result[0]["playerid"]
-        getPercentage();
-      }
-      else if (result === Object(result) && "percentage" in result) {
-          document.getElementById("progress").value = result["percentage"];
+      if ("result" in rx) {
+        var result = rx["result"];
+       
+        if (result.length == 1 && result[0] === Object(result[0]) && "playerid" in result[0])
+        {
+          active_playerid = result[0]["playerid"]
+          getPercentage();
+        }
+        else if (result === Object(result) && "percentage" in result) {
+          if (result["percentage"] == 0) {
+            hideProgress();
+            return;
+          }
+
+          document.getElementById("progress-slider").value = result["percentage"];
           document.getElementById("progress-text").innerHTML = result["time"]["hours"] + "h" + result["time"]["minutes"] + "m" + result["time"]["seconds"] + "s";
-          document.getElementById("slider").style["visibility"] = "visible";
+          document.getElementById("slider-container-main").style["display"] = "block";
+        }
+      } 
+      else if (result === Object(result) && "method" in rx && rx["method"] == "Player.OnStop")
+      {
+        hideProgress();
       }
     }
 
@@ -295,9 +324,9 @@
       <div class="sk-rect sk-rect4"></div>
       <div class="sk-rect sk-rect5"></div>
     </div>
-    <div id="slider" class="slidecontainer" style="visibility: collapse;">
-      <input type="range" min="1" max="100" class="slider" id="progress" onchange="seek(this.value)"/>
-      <div style="text-align: center; margin: 10px; color: rgb(0, 71, 95);" id="progress-text"></div>
+    <div id="slider-container-main" class="slidecontainer">
+      <input type="range" min="1" max="100" class="slider" id="progress-slider" onchange="seek(this.value)"/>
+      <div class="slider-text" id="progress-text"></div>
     </div>
     <div style="text-align: center;"><a href="{{ .KodiURL }}">Kodi Web Interface</a></div>
   </form></div>
