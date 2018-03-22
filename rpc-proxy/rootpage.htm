@@ -196,7 +196,6 @@
   <script>
     var active_playerid = -1;
     var refresh_timer = null;
-    var activeplayer_timer = null;
     var connection = new WebSocket('ws://{{ .KodiRPC }}');
 
     function resetForm(in_progress) {
@@ -239,25 +238,18 @@
 
       clearTimeout(refresh_timer);
 
-      if (active_playerid != -1)
-      {
+      if (active_playerid != -1) {
         refresh_timer = window.setTimeout(getPercentage, 1000);
       }
     }
 
     function getActivePlayers() {
       connection.send(JSON.stringify({"id": 1, "jsonrpc": "2.0", "method": "Player.GetActivePlayers"}));
-
-      clearTimeout(activeplayer_timer);
-      if (active_playerid == -1) {
-        activeplayer_timer = window.setTimeout(getActivePlayers, 1000);
-      }
     }
 
     function hideProgress() {
         active_playerid = -1;
         document.getElementById("slider-container-main").style["display"] = "none";
-        getActivePlayers();
     }
 
     function seek(value) {
@@ -268,6 +260,10 @@
         "params": { "playerid": active_playerid, "value": parseFloat(value)}
       }));
     }
+
+    connection.onopen = function () {
+      getActivePlayers();
+    };
 
     connection.onerror = function (e) {
       console.log('Error: ' + e.data);
@@ -283,8 +279,7 @@
       if ("result" in rx) {
         var result = rx["result"];
        
-        if (result.length == 1 && result[0] === Object(result[0]) && "playerid" in result[0])
-        {
+        if (result.length == 1 && result[0] === Object(result[0]) && "playerid" in result[0]) {
           active_playerid = result[0]["playerid"]
           getPercentage();
         }
@@ -298,17 +293,20 @@
           document.getElementById("progress-text").innerHTML = result["time"]["hours"] + "h" + result["time"]["minutes"] + "m" + result["time"]["seconds"] + "s";
           document.getElementById("slider-container-main").style["display"] = "block";
         }
-      } 
-      else if (result === Object(result) && "method" in rx && rx["method"] == "Player.OnStop")
-      {
-        hideProgress();
+      }
+      else if (rx === Object(rx) && "method" in rx) {
+        if (rx["method"] == "Player.OnStop") {
+          hideProgress();
+        }
+        if (rx["method"] == "Player.OnPlay") {
+          active_playerid = rx["params"]["data"]["player"]["playerid"];
+          getPercentage();
+        }
+        if (rx["method"] == "Player.OnPause") {
+          active_playerid = -1;
+        }
       }
     }
-
-    connection.onopen = function () {
-      getActivePlayers();
-    };
-
   </script>
 </head>
 <body>
