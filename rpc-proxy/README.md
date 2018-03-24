@@ -14,7 +14,11 @@ Systemd service file
 
 ```
 Usage of ./rpc-proxy:
- -port int
+ -http int
+ 	http port of kodi
+ -rpc
+ 	rpc port of kodi
+ -server
       Server port (default 8000)
 ```
 
@@ -22,5 +26,5 @@ Usage of ./rpc-proxy:
 
 Json post requst to %kodi-ip%:8000/jsonrpc
 
-{"ur": "youtube.com/kjasdlkajsld"}
+{"url": "youtube.com/kjasdlkajsld"}
 
