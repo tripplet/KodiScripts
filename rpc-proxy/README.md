@@ -17,9 +17,9 @@ Usage of ./rpc-proxy:
  -http int
  	http port of kodi
  -rpc
- 	rpc port of kodi
+	rpc port of kodi
  -server
-      Server port (default 8000)
+	Server port (default 8000)
 ```
 
 ## RPC Format
