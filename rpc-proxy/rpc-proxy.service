@@ -4,6 +4,11 @@ Requires=network.target network-online.target
 Required=kodi.target
 
 [Service]
+DynamicUser=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
 ExecStart=/storage/.config/rpc-proxy -server 8000 -kodi 8080
 Restart = always
 RestartSec = 10
