@@ -1,3 +1,3 @@
 #!/bin/sh
 go generate
-env GOOS=linux GOARCH=arm go build -o rpc-proxy
+env GOOS=linux GOARCH=arm go build -ldflags "-s -w" -o rpc-proxy
