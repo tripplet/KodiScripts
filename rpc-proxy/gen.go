@@ -12,10 +12,11 @@ import (
 	"path/filepath"
 	"regexp"
 	"time"
-	"github.com/tdewolff/minify"
-	"github.com/tdewolff/minify/css"
-	"github.com/tdewolff/minify/html"
-	"github.com/tdewolff/minify/js"
+
+	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/css"
+	"github.com/tdewolff/minify/v2/html"
+	"github.com/tdewolff/minify/v2/js"
 )
 
 func main() {
@@ -26,10 +27,10 @@ func main() {
 	m := minify.New()
 	m.AddFunc("text/css", css.Minify)
 	m.AddFunc("text/html", html.Minify)
-	m.AddFunc("text/javascript", js.Minify)
+	m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
 
 	for _, goFile := range files {
-		fmt.Printf("%s ... ", goFile)
+		fmt.Printf("%s... ", goFile)
 
 		goFileContent, err := ioutil.ReadFile(goFile)
 		if err != nil {
