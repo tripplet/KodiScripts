@@ -1,0 +1,141 @@
+# https://kodi.wiki/view/JSON-RPC_API
+# https://kodi.wiki/view/JSON-RPC_API/v12
+
+# Set hostname in .env file (syntax: baseurl=http://...)
+@baseurl = {{$dotenv baseurl}}
+@active_playerid = 1
+
+### Ping
+POST {{baseurl}}
+
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "JSONRPC.Ping"
+}
+
+### GetActivePlayers
+POST {{baseurl}}
+
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "Player.GetActivePlayers"
+}
+
+### Get Properties
+POST {{baseurl}}
+
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "Player.GetProperties",
+    "params": {
+      "playerid": {{active_playerid}},
+      "properties": ["playlistid", "position", "percentage", "time", "totaltime", "speed"]
+    }
+}
+
+### Info
+POST {{baseurl}}
+
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "Player.GetItem",
+    "params": {
+      "playerid": {{active_playerid}},
+      "properties": ["title", "file", "runtime", "starttime", "endtime", "thumbnail"]
+    }
+}
+
+### Play/Pause
+POST {{baseurl}}
+
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "Player.PlayPause",
+    "params": {
+        "playerid": {{active_playerid}}
+    }
+}
+
+### Mute
+POST {{baseurl}}
+
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "Application.SetMute",
+    "params": {
+        "mute": "toggle"
+    }
+}
+
+### Seek
+POST {{baseurl}}
+
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "Player.Seek",
+  "params": {
+    "playerid": {{{active_playerid}},
+    "value": {
+      "hours": 0,
+      "minutes": 0,
+      "seconds": 30
+    }
+  }
+}
+
+### Play URL
+POST {{baseurl}}
+
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "Player.open",
+  "params": {
+    "item": {
+      "file": "{http://URL-HERE}"
+    }
+  }
+}
+
+### Play Youtube
+POST {{baseurl}}
+
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "Player.Open",
+  "params": {
+    "item": {
+      "file": "plugin://plugin.video.youtube/?action=play_video&videoid={VIDEOID}"
+    }
+  }
+}
+
+### Play URL and seek
+POST {{baseurl}}
+
+
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "Player.Open",
+    "params": {
+        "item": {
+            "file": "plugin://plugin.video.youtube/?action=play_video&videoid={VIDEOID}"
+        },
+        "options": {
+            "resume": {
+                "hours": 0,
+                "minutes": 0,
+                "seconds": 30
+            }
+        }
+    }
+}
