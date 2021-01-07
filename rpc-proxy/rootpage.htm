@@ -6,15 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kodi</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Light theme settings and fallback if prefers-color-scheme is not supported */
+        :root {
+            --background: rgb(210, 210, 210);
+            --slider-text-color: rgb(0, 71, 95);
+        }
+
+        @media screen and (prefers-color-scheme: dark) {
+            :root {
+                --color: rgb(219, 219, 219);
+                --background: #25282c;
+                --background-popup: var(--background);
+                --slider-text-color: rgb(102, 181, 208);
+            }
+
+            input {
+                color: var(--color);
+            }
+
+            input.InputAddOn-field {
+                background-color: var(--background);
+                filter: brightness(1.6);
+            }
+        }
+
         html,
         body {
             height: 100%;
-            background-color: rgb(210, 210, 210);
+            background-color: var(--background);
             margin: 0;
         }
 
         /* Custom style for small devices */
-
         @media (max-width: 750px) {
             .InputAddOn {
                 display: block !important;
@@ -28,7 +55,7 @@
             }
 
             input[name="url"] {
-                width: 84% !important;
+                width: 85% !important;
             }
         }
 
@@ -202,7 +229,7 @@
         .slider-text {
             text-align: center;
             margin: 10px;
-            color: rgb(0, 71, 95);
+            color: var(--slider-text-color);
         }
 
         .slider:hover {
