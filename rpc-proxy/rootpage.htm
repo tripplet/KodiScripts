@@ -260,20 +260,23 @@
         }
     </style>
     <script>
-        var active_playerid = -1;
-        var refresh_timer = null;
-        var ws = new WebSocket('ws://{{ .KodiRPC }}');
+        window.active_playerid = -1;
+        window.refresh_timer = null;
+
+        const ws = new WebSocket(localStorage.getItem('OVERRIDE_WS_URL') || 'ws://{{ .KodiRPC }}');
 
         function resetForm(in_progress) {
-            var link = document.getElementById("link");
-            var progress = document.getElementById("progress");
-            var button = document.getElementById("send-link");
+            const link = document.getElementById('link');
+            const progress = document.getElementById('progress');
+            const button = document.getElementById('send-link');
+
             if (in_progress) {
-                progress_state = "block";
+                progress_state = 'block';
             }
             else {
-                progress_state = "none";
+                progress_state = 'none';
             }
+
             progress.style.display = progress_state;
             button.disabled = in_progress;
             link.disabled = in_progress;
@@ -281,13 +284,13 @@
 
         function sendUrl() {
             resetForm(true);
-            fetch("/jsonrpc", {
-                headers: { "Content-Type": "application/json" },
-                method: "post",
-                body: JSON.stringify({ "url": link.value })
+            fetch('/jsonrpc', {
+                headers: { 'Content-Type': 'application/json' },
+                method: 'post',
+                body: JSON.stringify({ 'url': link.value })
             }).then(function (response) {
                 resetForm(false);
-                link.value = "";
+                link.value = '';
             }).catch(function (err) {
                 resetForm(false);
                 alert(err);
@@ -295,39 +298,48 @@
         }
 
         function getPercentage() {
-            ws.send(JSON.stringify({
-                "id": 1,
-                "jsonrpc": "2.0",
-                "method": "Player.GetProperties",
-                "params": { "playerid": active_playerid, "properties": ["percentage", "time", "totaltime"] }
-            }));
+            if (window.active_playerid != -1) {
+                ws.send(JSON.stringify({
+                    'id': 1,
+                    'jsonrpc': '2.0',
+                    'method': 'Player.GetProperties',
+                    'params': { 'playerid': window.active_playerid, 'properties': ['percentage', 'time', 'totaltime'] }
+                }));
+            }
 
-            clearTimeout(refresh_timer);
+            clearTimeout(window.refresh_timer);
 
-            if (active_playerid != -1) {
-                refresh_timer = window.setTimeout(getPercentage, 1000);
+            if (window.active_playerid != -1) {
+                window.refresh_timer = window.setTimeout(getPercentage, 1000);
             }
         }
 
         function getActivePlayers() {
-            ws.send(JSON.stringify({ "id": 1, "jsonrpc": "2.0", "method": "Player.GetActivePlayers" }));
+            ws.send(JSON.stringify({ 'id': 1, 'jsonrpc': '2.0', 'method': 'Player.GetActivePlayers' }));
         }
 
         function hideProgress() {
-            active_playerid = -1;
-            document.getElementById("slider-container-main").style.display = "none";
+            window.active_playerid = -1;
+            document.getElementById('slider-container-main').style.display = 'none';
         }
 
         function getTitle() {
-            ws.send(JSON.stringify({ "id": 1, "jsonrpc": "2.0", "method": "Player.GetItem", "params": { "playerid": active_playerid } }));
+            if (window.active_playerid == -1) { return; }
+            ws.send(JSON.stringify({
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'Player.GetItem',
+                'params': { 'playerid': window.active_playerid }
+            }));
         }
 
         function seek(value) {
+            if (window.active_playerid == -1) { return; }
             ws.send(JSON.stringify({
-                "id": 1,
-                "jsonrpc": "2.0",
-                "method": "Player.Seek",
-                "params": { "playerid": active_playerid, "value": parseFloat(value) }
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'Player.Seek',
+                'params': { 'playerid': window.active_playerid, 'value': parseFloat(value) }
             }));
         }
 
@@ -339,46 +351,48 @@
             console.log('Error: ' + e.data);
         }
 
-        // Log messages from the server
+        // Parse messages from the server
         ws.onmessage = function (e) {
-            var rx = JSON.parse(e.data);
+            const rx = JSON.parse(e.data);
             if (rx === undefined) {
                 return;
             }
 
-            if ("result" in rx) {
-                var result = rx["result"];
+            if ('result' in rx) {
+                const result = rx['result'];
 
-                if (result.length == 1 && result[0] === Object(result[0]) && "playerid" in result[0]) {
-                    active_playerid = result[0]["playerid"]
+                if (result.length == 1 && result[0] === Object(result[0]) && 'playerid' in result[0]) {
+                    window.active_playerid = result[0]['playerid']
                     getPercentage();
                     getTitle();
                 }
-                else if (result === Object(result) && "item" in result) {
-                    document.getElementById("info-text").innerHTML = result["item"]["label"];
+                else if (result === Object(result) && 'item' in result) {
+                    document.getElementById('info-text').innerHTML = result['item']['label'];
                 }
-                else if (result === Object(result) && "percentage" in result) {
-                    if (result["percentage"] == 0) {
-                        hideProgress();
+                else if (result === Object(result) && 'percentage' in result) {
+                    if (result['percentage'] == 0) {
                         return;
                     }
 
-                    document.getElementById("progress-slider").value = result["percentage"];
-                    document.getElementById("progress-text").innerHTML = result["time"]["hours"] + "h" + result["time"]["minutes"] + "m" + result["time"]["seconds"] + "s";
-                    document.getElementById("slider-container-main").style.display = "block";
+                    document.getElementById('progress-slider').value = result['percentage'];
+                    document.getElementById('progress-text').innerHTML = result['time']['hours'] + 'h' + result['time']['minutes'] + 'm' + result['time']['seconds'] + 's';
+                    document.getElementById('slider-container-main').style.display = 'block';
                 }
             }
-            else if (rx === Object(rx) && "method" in rx) {
-                if (rx["method"] == "Player.OnStop") {
-                    hideProgress();
-                }
-                if (rx["method"] == "Player.OnPlay") {
-                    active_playerid = rx["params"]["data"]["player"]["playerid"];
+            else if (rx === Object(rx) && 'method' in rx) {
+                if (rx['method'] == 'Player.OnPlay') {
+                    window.active_playerid = rx['params']['data']['player']['playerid'];
                     getTitle();
                     getPercentage();
                 }
-                if (rx["method"] == "Player.OnPause") {
-                    active_playerid = -1;
+                else if (rx['method'] == 'Player.OnPause') {
+                    window.active_playerid = -1;
+                }
+                else if (rx['method'] == 'Player.OnResume') {
+                    getPercentage();
+                }
+                else if (rx['method'] == 'Player.OnStop') {
+                    hideProgress();
                 }
             }
         }
@@ -389,8 +403,7 @@
     <div class="container">
         <form>
             <div class="InputAddOn">
-                <input name="url" id="link" class="InputAddOn-field" placeholder="http://..." autocomplete="off" type="url" size="50" autofocus
-                    required/>
+                <input name="url" id="link" class="InputAddOn-field" placeholder="http://..." autocomplete="off" type="url" size="50" autofocus required />
                 <input class="InputAddOn-item" id="send-link" type="submit" onclick="sendUrl()" />
             </div>
             <div class="sk-wave" id="progress">
