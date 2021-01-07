@@ -263,7 +263,7 @@
         window.active_playerid = -1;
         window.refresh_timer = null;
 
-        const ws = new WebSocket(localStorage.getItem('OVERRIDE_WS_URL') || 'ws://{{ .KodiRPC }}');
+        const ws = new WebSocket(localStorage.getItem('OVERRIDE_WS_URL') || 'ws://%%% .KodiRPC %%%');
 
         function resetForm(in_progress) {
             const link = document.getElementById('link');
