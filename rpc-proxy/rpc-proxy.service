@@ -9,6 +9,7 @@ PrivateTmp=true
 PrivateDevices=true
 ProtectSystem=strict
 ProtectHome=true
+NoNewPriviliges=true
 ExecStart=/storage/.config/rpc-proxy -server 8000 -kodi 8080
 Restart=always
 RestartSec=5
