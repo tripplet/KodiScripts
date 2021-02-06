@@ -9,15 +9,15 @@ import (
 	"time"
 )
 
-const youtube = `{"jsonrpc": "2.0", "method": "Player.Open", "params":{` +
-	`"item": {"file":"plugin://plugin.video.youtube/?action=` +
+const youtube = `{"jsonrpc": "2.0", "method": "Player.Open", "params": {` +
+	`"item": {"file": "plugin://plugin.video.youtube/?action=` +
 	`play_video&videoid=%s"}}, "id" : 1}`
-const youtubeAndSeek = `{"jsonrpc":"2.0","method":"Player.Open","params":{` +
-	`"item":{"file":"plugin://plugin.video.youtube/?action=` +
-	`play_video&videoid=%s"},` +
-	`"options":` +
-	`{"resume":{"hours":%d,"minutes":%d,"seconds":%d}}` +
-	`},"id":1},`
+const youtubeAndSeek = `{"jsonrpc": "2.0","method": "Player.Open","params": {` +
+	`"item": {"file": "plugin://plugin.video.youtube/?action=` +
+	`play_video&videoid=%s"}, ` +
+	`"options": ` +
+	`{"resume": {"hours": %d, "minutes": %d, "seconds": %d}}` +
+	`},"id": 1}`
 const genericURL = `{"jsonrpc": "2.0", "method": "Player.open", "params": ` +
 	`{"item": {"file": "%s"}}, "id": 1}`
 
