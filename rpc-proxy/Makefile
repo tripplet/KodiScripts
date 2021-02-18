@@ -12,8 +12,8 @@ generate:
 	@$(GO) generate
 
 rpc-proxy-rpi: generate
-	@echo Building rpc-proxy
-	env GOOS=linux GOARCH=arm $(GO) build -ldflags "-s -w" -o rpc-proxy-rpi
+	@echo Building rpc-proxy for linux/arm
+	env GOOS=linux GOARCH=arm $(GO) build -ldflags "-s -w" -trimpath -o rpc-proxy-rpi
 
 rpc-proxy: generate
 	@echo Building rpc-proxy
