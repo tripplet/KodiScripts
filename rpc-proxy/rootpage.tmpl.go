@@ -25,8 +25,8 @@ func rootpage(w http.ResponseWriter, req *http.Request) {
 		KodiURL string
 		KodiRPC string
 	}{
-		KodiURL: "http://" + host + ":" + strconv.Itoa(*kodiHttpPort),
-		KodiRPC: host + ":" + strconv.Itoa(*kodiRpcPort),
+		KodiURL: "http://" + host + ":" + strconv.Itoa(*kodiHTTPPort),
+		KodiRPC: host + ":" + strconv.Itoa(*kodiRPCPort),
 	})
 }
 
