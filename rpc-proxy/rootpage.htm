@@ -262,6 +262,7 @@
     <script>
         window.active_playerid = -1;
         window.refresh_timer = null;
+        window.playback_active = false;
 
         const ws = new WebSocket(localStorage.getItem('OVERRIDE_WS_URL') || 'ws://%%% .KodiRPC %%%');
 
@@ -295,6 +296,7 @@
                 resetForm(false);
                 alert(err);
             });
+            return false;
         }
 
         function getPercentage() {
@@ -303,13 +305,13 @@
                     'id': 1,
                     'jsonrpc': '2.0',
                     'method': 'Player.GetProperties',
-                    'params': { 'playerid': window.active_playerid, 'properties': ['percentage', 'time', 'totaltime'] }
+                    'params': { 'playerid': window.active_playerid, 'properties': ['percentage', 'time', 'totaltime', 'speed'] }
                 }));
             }
 
             clearTimeout(window.refresh_timer);
 
-            if (window.active_playerid != -1) {
+            if (window.playback_active) {
                 window.refresh_timer = window.setTimeout(getPercentage, 1000);
             }
         }
@@ -343,6 +345,42 @@
             }));
         }
 
+        function seekStep(value) {
+            if (window.active_playerid == -1) { return; }
+            ws.send(JSON.stringify({
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'Player.Seek',
+                'params': { 'playerid': window.active_playerid, 'value': { 'step': value }}
+            }));
+        }
+
+        function playPause() {
+            ws.send(JSON.stringify({
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'Player.PlayPause',
+                'params': { 'playerid': window.active_playerid }
+            }));
+        }
+
+        function showOSD() {
+            ws.send(JSON.stringify({
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'Input.ShowOSD'
+            }));
+        }
+
+        function stop() {
+            ws.send(JSON.stringify({
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'Player.Stop',
+                'params': { 'playerid': window.active_playerid }
+            }));
+        }
+
         ws.onopen = function () {
             getActivePlayers();
         };
@@ -362,31 +400,42 @@
                 const result = rx['result'];
 
                 if (result.length == 1 && result[0] === Object(result[0]) && 'playerid' in result[0]) {
-                    window.active_playerid = result[0]['playerid']
+                    window.active_playerid = result[0]['playerid'];
                     getPercentage();
                     getTitle();
                 }
                 else if (result === Object(result) && 'item' in result) {
                     document.getElementById('info-text').innerHTML = result['item']['label'];
                 }
-                else if (result === Object(result) && 'percentage' in result) {
-                    if (result['percentage'] == 0) {
-                        return;
-                    }
+                else {
+                    if (result === Object(result) && 'speed' in result) {
+                        window.playback_active = result['speed'] != 0;
 
-                    document.getElementById('progress-slider').value = result['percentage'];
-                    document.getElementById('progress-text').innerHTML = result['time']['hours'] + 'h' + result['time']['minutes'] + 'm' + result['time']['seconds'] + 's';
-                    document.getElementById('slider-container-main').style.display = 'block';
+                        clearTimeout(window.refresh_timer);
+                        if (window.playback_active) {
+                            window.refresh_timer = window.setTimeout(getPercentage, 1000);
+                        }
+                    }
+                    if (result === Object(result) && 'percentage' in result) {
+                        if (result['percentage'] == 0) {
+                            return;
+                        }
+
+                        document.getElementById('progress-slider').value = result['percentage'];
+                        document.getElementById('progress-text').innerHTML = result['time']['hours'] + 'h' + result['time']['minutes'] + 'm' + result['time']['seconds'] + 's';
+                        document.getElementById('slider-container-main').style.display = 'block';
+                    }
                 }
             }
             else if (rx === Object(rx) && 'method' in rx) {
                 if (rx['method'] == 'Player.OnPlay') {
+                    window.playback_active = true;
                     window.active_playerid = rx['params']['data']['player']['playerid'];
                     getTitle();
                     getPercentage();
                 }
                 else if (rx['method'] == 'Player.OnPause') {
-                    window.active_playerid = -1;
+                    window.playback_active = false;
                 }
                 else if (rx['method'] == 'Player.OnResume') {
                     getPercentage();
@@ -394,6 +443,14 @@
                 else if (rx['method'] == 'Player.OnStop') {
                     hideProgress();
                 }
+            }
+
+            const playPause = document.querySelector('#play-pause');
+            if (window.playback_active) {
+                playPause.text = '[Pause]';
+            }
+            else {
+                playPause.text = '[Play]';
             }
         }
     </script>
@@ -417,6 +474,14 @@
                 <div class="slider-text" id="info-text"></div>
                 <input type="range" min="1" max="100" class="slider" id="progress-slider" onchange="seek(this.value)" />
                 <div class="slider-text" id="progress-text"></div>
+                <div class="slider-text">&nbsp;
+                    <a href="#" onclick="seekStep('smallbackward')">&lt;&lt;</a>
+                    &nbsp;<a href="#" id="play-pause" onclick="playPause()">[Play]</a>
+                    &nbsp;<a href="#" onclick="seekStep('smallforward')">&gt;&gt;</a></div>
+                <div class="slider-text">
+                    <a href="#" onclick="showOSD()">[OSD]</a>
+                    <a href="#" onclick="stop()">[Stop]</a>
+                </div>
             </div>
             <div style="text-align: center;">
                 <a href="%%% .KodiURL %%%">Kodi Web Interface</a>
