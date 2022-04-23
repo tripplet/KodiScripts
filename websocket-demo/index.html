@@ -1,0 +1,26 @@
+<html>
+    <script>
+        function getVersion() {
+            const host = document.getElementById("host").value;
+            const responseElement = document.getElementById("response");
+            const ws = new WebSocket(`ws://${host}:9090`);
+
+            ws.onopen = function () {
+                ws.send(JSON.stringify({id: "test", jsonrpc: "2.0", method: "JSONRPC.Version"}))
+            };
+
+            ws.onmessage = function (evt) {
+                responseElement.innerText += evt.data + "\r\n";
+            }
+        }
+
+
+    </script>
+    <body style="background-color: #DDDDDD; margin: 20px; font-size: 18px;">
+        <label for="host">Kodi IP/Hostname:</label>
+        <input type="text" placeholder="kodi.local" id="host">
+        <br/>
+        <button onclick="getVersion()">Connect</button>
+        <pre id="response"></pre>
+    </body>
+</html>
